@@ -1,2 +1,4 @@
 # TriFecto
- Digitalni port moje drustvene igre na Android
+ Digitalni port moje drustvene igre za Android
+
+ Igra je inspirisana Android igrom godine - Marvel Snap
