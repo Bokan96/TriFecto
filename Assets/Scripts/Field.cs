@@ -32,7 +32,7 @@ public class Field
         int playerID = player.PlayerID;
         int faction = card.Faction;
 
-        if (faction != areaIndex + 1) // Assuming factions are numbered from 1 to 3
+        if ((faction != areaIndex + 1) && (card.IsFlipped == false))
         {
             Debug.Log($"Cannot play card {card.Id} in Area {areaIndex + 1} with faction {faction}. Faction mismatch.");
             return;

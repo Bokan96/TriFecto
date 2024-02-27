@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Player
 {
@@ -19,14 +20,23 @@ public class Player
     {
         Hand.Add(card);
     }
+    public void SortCardsInHandById()
+    {
+        Hand = Hand.OrderBy(card => card.Id).ToList();
+    }
 
     public void DisplayPlayerInfo()
     {
         Debug.Log($"Player ID: {PlayerID}, HP: {CurrentHP}");
         Debug.Log("Cards in hand:");
-        foreach (Card card in Hand)
+        if (Hand.Count > 0)
         {
-            card.DisplayCardInfo();
+            foreach (Card card in Hand)
+            {
+                card.DisplayCardInfo();
+            }
         }
+        else
+            Debug.Log("No cards in hand");
     }
 }

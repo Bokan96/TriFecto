@@ -12,10 +12,9 @@ public class Deck
     {
         cards = new List<Card>();
 
-        // Assuming you want 10 cards with different IDs and factions for simplicity
-        for (int i = 1; i <= 10; i++)
+        for (int i = 1; i <= 18; i++)
         {
-            Card newCard = new Card(i, UnityEngine.Random.Range(1, 11), UnityEngine.Random.Range(1, 4)); // Assuming 3 factions
+            Card newCard = new Card(i);
             cards.Add(newCard);
         }
     }
