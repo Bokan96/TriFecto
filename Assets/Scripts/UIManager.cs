@@ -14,23 +14,17 @@ public class UIManager : MonoBehaviour
     public Image cardPreview;
     public Sprite[] cardImages;
 
-    private int selectedCardHandId = 0;
+    public int selectedCardHandId = 0;
 
 
     void Start()
     {
-        // Assign the Text elements in the Unity editor
-        player1InfoText.text = "Player 1: ";
-        player2InfoText.text = "Player 2: ";
-
         player1Dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
         odigrajButton.onClick.AddListener(OnUpdatePowerButtonClick);
 
-        // Access the GameEngine script to display player information
         if (gameEngine != null)
         {
             UpdatePlayerInfo();
-            
         }
         else
         {
@@ -46,18 +40,20 @@ public class UIManager : MonoBehaviour
 
     void OnUpdatePowerButtonClick()
     {
-
         gameText.text = selectedCardHandId + "\n" + gameEngine.player1.Hand[selectedCardHandId].Name;
+        gameEngine.field.PlayCard(gameEngine.player1, gameEngine.player1.Hand[selectedCardHandId],1);
+        selectedCardHandId = 0;
+        cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+
+        UpdatePlayerInfo();
     }
 
-    void UpdatePlayerInfo()
+    public void UpdatePlayerInfo()
     {
-        // Update the UI with player information from the GameEngine
         
-        player1InfoText.text += $"{gameEngine.player1.CurrentHP} HP\n\n";
-        player2InfoText.text += $"{gameEngine.player2.CurrentHP} HP\n\n";
+        player1InfoText.text = $"{gameEngine.player1.CurrentHP} HP\n\n";
+        player2InfoText.text = $"{gameEngine.player2.CurrentHP} HP\n\n";
 
-        // Add card information to the UI
         player1InfoText.text += "Cards:\n";
         foreach (Card card in gameEngine.player1.Hand)
         {

@@ -4,10 +4,7 @@ using UnityEngine;
 
 public class Deck
 {
-    // Deck attributes
     private List<Card> cards;
-
-    // Constructor to initialize the deck with 10 cards
     public Deck()
     {
         cards = new List<Card>();
@@ -19,7 +16,6 @@ public class Deck
         }
     }
 
-    // Method to shuffle the deck
     public void Shuffle()
     {
         System.Random rng = new System.Random();
@@ -34,12 +30,11 @@ public class Deck
         }
     }
 
-    // Method to deal a card to a player
     public Card DealCardToPlayer(Player player)
     {
         if (cards.Count == 0)
         {
-            Debug.Log("The deck is empty. Cannot deal more cards.");
+            Debug.Log("Spil je prazan.");
             return null;
         }
 
@@ -50,10 +45,9 @@ public class Deck
         return dealtCard;
     }
 
-    // Method to display the current state of the deck
     public void DisplayDeck()
     {
-        Debug.Log("Current state of the deck:");
+        Debug.Log("KArte u spilu:");
         foreach (Card card in cards)
         {
             card.DisplayCardInfo();

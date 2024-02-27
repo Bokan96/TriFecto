@@ -38,9 +38,11 @@ public class Field
             return;
         }
 
+        player.Hand.Remove(card);
         factionAreas[areaIndex, playerID].Add(card);
         playerTotalPower[areaIndex, playerID] += card.Power;
 
+        
         UpdateWinningPlayer(areaIndex);
     }
 
