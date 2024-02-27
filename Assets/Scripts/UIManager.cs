@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
     public Sprite[] cardImages;
 
     public int selectedCardHandId = 0;
+    public int selectedArea = 0;
 
 
     void Start()
@@ -41,11 +42,23 @@ public class UIManager : MonoBehaviour
     void OnUpdatePowerButtonClick()
     {
         gameText.text = selectedCardHandId + "\n" + gameEngine.player1.Hand[selectedCardHandId].Name;
-        gameEngine.field.PlayCard(gameEngine.player1, gameEngine.player1.Hand[selectedCardHandId],1);
+        gameEngine.field.PlayCard(gameEngine.player1, gameEngine.player1.Hand[selectedCardHandId], selectedArea);
         selectedCardHandId = 0;
-        cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+        if (gameEngine.player1.Hand.Count > 0)
+            cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+        else
+        {
+            odigrajButton.enabled = false;
+            cardPreview.sprite = cardImages[0];
+        }
+            
+
 
         UpdatePlayerInfo();
+    }
+    public void OnAreaClick(int index)
+    {
+        selectedArea = index;
     }
 
     public void UpdatePlayerInfo()
@@ -80,6 +93,7 @@ public class UIManager : MonoBehaviour
         }
 
         dropdown.AddOptions(cardOptions);
-        cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+        if(gameEngine.player1.Hand.Count> 0)
+            cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
     }
 }
