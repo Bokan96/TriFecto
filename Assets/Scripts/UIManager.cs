@@ -1,23 +1,30 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using System.Collections.Generic;
 using UnityEngine.UI;
-using TMPro;
-using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class UIManager : MonoBehaviour
 {
     public TextMeshProUGUI player1InfoText;
     public TextMeshProUGUI player2InfoText;
-    public GameEngine gameEngine; // Reference to your GameEngine script
+    public TextMeshProUGUI gameText;
+    public GameEngine gameEngine;
     public Dropdown player1Dropdown;
+    public Button odigrajButton;
+    public Image cardPreview;
+    public Sprite[] cardImages;
+
+    private int selectedCardHandId = 0;
+
 
     void Start()
     {
         // Assign the Text elements in the Unity editor
         player1InfoText.text = "Player 1: ";
         player2InfoText.text = "Player 2: ";
+
+        player1Dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
+        odigrajButton.onClick.AddListener(OnUpdatePowerButtonClick);
 
         // Access the GameEngine script to display player information
         if (gameEngine != null)
@@ -29,6 +36,18 @@ public class UIManager : MonoBehaviour
         {
             Debug.LogError("GameEngine script not assigned to UIManager.");
         }
+    }
+
+    void OnDropdownValueChanged(int index)
+    {
+        selectedCardHandId = index;
+        cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+    }
+
+    void OnUpdatePowerButtonClick()
+    {
+
+        gameText.text = selectedCardHandId + "\n" + gameEngine.player1.Hand[selectedCardHandId].Name;
     }
 
     void UpdatePlayerInfo()
@@ -58,15 +77,13 @@ public class UIManager : MonoBehaviour
     {
         dropdown.ClearOptions();
 
-        // Create a list of options based on cards in hand
         List<string> cardOptions = new List<string>();
         foreach (Card card in player.Hand)
         {
             cardOptions.Add($"ID: {card.Id}, Power: {card.Power}, Faction: {card.Faction}");
         }
 
-        // Populate the Dropdown with card options
         dropdown.AddOptions(cardOptions);
-
+        cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
     }
 }

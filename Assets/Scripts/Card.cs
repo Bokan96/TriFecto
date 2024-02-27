@@ -7,17 +7,19 @@ using UnityEngine;
 
 public class Card
 {
-    public int Id { get; }
-    public int Power { get; }
-    public int Faction { get; }
-    public bool IsFlipped { get; }
+    public int Id { get; set; }
+    public int Power { get; set; }
+    public int Faction { get; set; }
+    public bool IsFlipped { get; set; }
+    public String Name { get; set; }
 
-    public Card(int id, int power, int faction, bool isFlipped)
+    public Card(int id, int power, int faction, bool isFlipped, String name)
     {
         Id = id;
         Power = power;
         Faction = faction;
         IsFlipped = isFlipped;
+        Name = name;
     }
 
     
@@ -27,75 +29,34 @@ public class Card
         Power = (id - 1) % 6 + 1;
         Faction = (id - 1) / 6 + 1;
         IsFlipped |= false;
+        Name = id switch
+        {
+            1 => "Hinata",
+            2 => "Sakura",
+            3 => "Rock Lee",
+            4 => "Kakashi",
+            5 => "Sasuke",
+            6 => "Naruto",
+            7 => "Historia",
+            8 => "Erwin Smith",
+            9 => "Armin",
+            10 => "Eren Yeager",
+            11 => "Levi",
+            12 => "Mikasa",
+            13 => "May Cheng",
+            14 => "Armstrong",
+            15 => "Scar",
+            16 => "Roy Mustang",
+            17 => "Alphonse Elric",
+            18 => "Edvard Elric",
+            _ => "Bezimena",
+        };
     }
 
 
     public void DisplayCardInfo()
     {
-        string cardName;
-
-        switch (Id)
-        {
-            case 1:
-                cardName = "Hinata";
-                break;
-            case 2:
-                cardName = "Sakura";
-                break;
-            case 3:
-                cardName = "Rock Lee";
-                break;
-            case 4:
-                cardName = "Kakashi";
-                break;
-            case 5:
-                cardName = "Sasuke";
-                break;
-            case 6:
-                cardName = "Naruto";
-                break;
-            case 7:
-                cardName = "Historia";
-                break;
-            case 8:
-                cardName = "Erwin Smith";
-                break;
-            case 9:
-                cardName = "Armin";
-                break;
-            case 10:
-                cardName = "Eren Yeager";
-                break;
-            case 11:
-                cardName = "Levi";
-                break;
-            case 12:
-                cardName = "Mikasa";
-                break;
-            case 13:
-                cardName = "May Cheng";
-                break;
-            case 14:
-                cardName = "Armstrong";
-                break;
-            case 15:
-                cardName = "Scar";
-                break;
-            case 16:
-                cardName = "Roy Mustang";
-                break;
-            case 17:
-                cardName = "Alphonse Elric";
-                break;
-            case 18:
-                cardName = "Edvard Elric";
-                break;
-            default:
-                cardName = "Bezimena";
-                break;
-        }
-
-        Debug.Log($"{cardName}:  POW {Power}| FAC {Faction}");
+        Debug.Log($"{Name}:  POW {Power}| FAC {Faction}");
     }
 
 }

@@ -27,11 +27,6 @@ public class GameEngine : MonoBehaviour
 
         DisplayGameState();
     }
-
-    void Update()
-    {
-
-    }
     public void DisplayGameState()
     {
         Debug.Log("Current Game State:");
