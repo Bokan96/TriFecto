@@ -27,7 +27,7 @@ public class Card
     {
         Id = id;
         Power = (id - 1) % 6 + 1;
-        Faction = (id - 1) / 6 + 1;
+        Faction = (id - 1) / 6;
         IsFlipped |= false;
         Name = id switch
         {
@@ -59,4 +59,8 @@ public class Card
         Debug.Log($"{Name}:  POW {Power}| FAC {Faction}");
     }
 
+    public override string ToString()
+    {
+        return $"[F{Faction}][P{Power}] {Name}";
+    }
 }

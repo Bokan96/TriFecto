@@ -8,6 +8,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI player1InfoText;
     public TextMeshProUGUI player2InfoText;
     public TextMeshProUGUI gameText;
+
     public GameEngine gameEngine;
     public Dropdown player1Dropdown;
     public Button odigrajButton;
@@ -51,8 +52,6 @@ public class UIManager : MonoBehaviour
             odigrajButton.enabled = false;
             cardPreview.sprite = cardImages[0];
         }
-            
-
 
         UpdatePlayerInfo();
     }
@@ -89,7 +88,7 @@ public class UIManager : MonoBehaviour
         List<string> cardOptions = new List<string>();
         foreach (Card card in player.Hand)
         {
-            cardOptions.Add($"ID: {card.Id}, Power: {card.Power}, Faction: {card.Faction}");
+            cardOptions.Add($"{card.ToString()}");
         }
 
         dropdown.AddOptions(cardOptions);

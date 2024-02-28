@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Field
 {
@@ -8,6 +9,7 @@ public class Field
     private List<Card>[,] factionAreas;
     private int[,] playerTotalPower;
     private Player[] winningPlayer;
+    private Image[,,] images;
 
     // Constructor to initialize the field with three faction areas
     public Field()
@@ -32,9 +34,9 @@ public class Field
         int playerID = player.PlayerID;
         int faction = card.Faction;
 
-        if ((faction != areaIndex + 1) && (card.IsFlipped == false))
+        if ((faction != areaIndex) && (card.IsFlipped == false))
         {
-            Debug.Log($"Cannot play card {card.Id} in Area {areaIndex + 1} with faction {faction}. Faction mismatch.");
+            Debug.Log($"Cannot play {card.ToString()} in Area {areaIndex} with faction {faction}. Faction mismatch.");
             return;
         }
 
