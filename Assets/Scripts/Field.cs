@@ -9,7 +9,8 @@ public class Field
     private List<Card>[,] factionAreas;
     private int[,] playerTotalPower;
     private Player[] winningPlayer;
-    private Image[,,] images;
+
+    public List<Card>[,] FactionAreas { get => factionAreas; set => factionAreas = value; }
 
     // Constructor to initialize the field with three faction areas
     public Field()
@@ -29,7 +30,7 @@ public class Field
     }
 
     // Method to play a card onto the field
-    public void PlayCard(Player player, Card card, int areaIndex)
+    public int PlayCard(Player player, Card card, int areaIndex)
     {
         int playerID = player.PlayerID;
         int faction = card.Faction;
@@ -37,15 +38,15 @@ public class Field
         if ((faction != areaIndex) && (card.IsFlipped == false))
         {
             Debug.Log($"Cannot play {card.ToString()} in Area {areaIndex} with faction {faction}. Faction mismatch.");
-            return;
+            return -1;
         }
 
         player.Hand.Remove(card);
         factionAreas[areaIndex, playerID].Add(card);
         playerTotalPower[areaIndex, playerID] += card.Power;
-
-        
         UpdateWinningPlayer(areaIndex);
+
+        return card.Id;
     }
 
     // Method to determine the winning player in each area

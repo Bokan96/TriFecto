@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,41 +14,59 @@ public class UIManager : MonoBehaviour
     public Dropdown player1Dropdown;
     public Button odigrajButton;
     public Image cardPreview;
+    public Image[] P1A0CardImages;
+    public Image[] P1A1CardImages;
+    public Image[] P1A2CardImages;
+    public Image[] P2A0CardImages;
+    public Image[] P2A1CardImages;
+    public Image[] P2A2CardImages;
     public Sprite[] cardImages;
 
     public int selectedCardHandId = 0;
+    public int selectedCardId;
     public int selectedArea = 0;
 
 
     void Start()
     {
+        selectedCardId = gameEngine.player1.Hand[selectedCardHandId].Id;
         player1Dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
         odigrajButton.onClick.AddListener(OnUpdatePowerButtonClick);
-
-        if (gameEngine != null)
-        {
-            UpdatePlayerInfo();
-        }
-        else
-        {
-            Debug.LogError("GameEngine script not assigned to UIManager.");
-        }
+        UpdatePlayerInfo();
     }
 
     void OnDropdownValueChanged(int index)
     {
         selectedCardHandId = index;
-        cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+        selectedCardId = gameEngine.player1.Hand[selectedCardHandId].Id;
+        cardPreview.sprite = cardImages[selectedCardId];
     }
 
     void OnUpdatePowerButtonClick()
     {
-        gameText.text = selectedCardHandId + "\n" + gameEngine.player1.Hand[selectedCardHandId].Name;
-        gameEngine.field.PlayCard(gameEngine.player1, gameEngine.player1.Hand[selectedCardHandId], selectedArea);
+        if (gameEngine.field.PlayCard(gameEngine.player1, gameEngine.player1.Hand[selectedCardHandId], selectedArea)>0){
+            if (selectedArea == 0)
+            {
+                P1A0CardImages[gameEngine.field.FactionAreas[selectedArea,0].Count-1].sprite = cardImages[selectedCardId];
+            }
+            else if (selectedArea == 1)
+            {
+                P1A1CardImages[gameEngine.field.FactionAreas[selectedArea,0].Count-1].sprite = cardImages[selectedCardId];
+            }
+            else if (selectedArea == 2)
+            {
+                P1A2CardImages[gameEngine.field.FactionAreas[selectedArea,0].Count-1].sprite = cardImages[selectedCardId];
+            }
+        }
+
         selectedCardHandId = 0;
+        
         if (gameEngine.player1.Hand.Count > 0)
+        {
+            selectedCardId = gameEngine.player1.Hand[selectedCardHandId].Id;
             cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
-        else
+        }
+            else
         {
             odigrajButton.enabled = false;
             cardPreview.sprite = cardImages[0];
