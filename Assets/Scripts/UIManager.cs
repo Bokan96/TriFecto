@@ -3,6 +3,21 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
+
+
+
+[System.Serializable]
+public class CardArea
+{
+    public List<PlayerImages> players;
+}
+
+[System.Serializable]
+public class PlayerImages
+{
+    public List<UnityEngine.UI.Image> cards;
+}
 
 public class UIManager : MonoBehaviour
 {
@@ -12,59 +27,49 @@ public class UIManager : MonoBehaviour
 
     public GameEngine gameEngine;
     public Dropdown player1Dropdown;
-    public Button odigrajButton;
-    public Image cardPreview;
-    public Image[] P1A0CardImages;
-    public Image[] P1A1CardImages;
-    public Image[] P1A2CardImages;
-    public Image[] P2A0CardImages;
-    public Image[] P2A1CardImages;
-    public Image[] P2A2CardImages;
+    public UnityEngine.UI.Button odigrajButton;
+    public UnityEngine.UI.Button[] areaButtons;
+    public UnityEngine.UI.Image cardPreview;
     public Sprite[] cardImages;
+
+    public CardArea[] areas;
+
 
     public int selectedCardHandId = 0;
     public int selectedCardId;
-    public int selectedArea = 0;
+    public int selectedArea = -1;
 
 
     void Start()
     {
-        selectedCardId = gameEngine.player1.Hand[selectedCardHandId].Id;
-        player1Dropdown.onValueChanged.AddListener(OnDropdownValueChanged);
-        odigrajButton.onClick.AddListener(OnUpdatePowerButtonClick);
+        selectedCardId = gameEngine.players[0].Hand[selectedCardHandId].Id;
+
+
+        player1Dropdown.onValueChanged.AddListener(OnCardSelect);
+        odigrajButton.onClick.AddListener(OnPlay);
         UpdatePlayerInfo();
     }
 
-    void OnDropdownValueChanged(int index)
+    void OnCardSelect(int index)
     {
         selectedCardHandId = index;
-        selectedCardId = gameEngine.player1.Hand[selectedCardHandId].Id;
+        selectedCardId = gameEngine.players[0].Hand[selectedCardHandId].Id;
         cardPreview.sprite = cardImages[selectedCardId];
     }
+    // 0 field.
 
-    void OnUpdatePowerButtonClick()
+    void OnPlay()
     {
-        if (gameEngine.field.PlayCard(gameEngine.player1, gameEngine.player1.Hand[selectedCardHandId], selectedArea)>0){
-            if (selectedArea == 0)
-            {
-                P1A0CardImages[gameEngine.field.FactionAreas[selectedArea,0].Count-1].sprite = cardImages[selectedCardId];
-            }
-            else if (selectedArea == 1)
-            {
-                P1A1CardImages[gameEngine.field.FactionAreas[selectedArea,0].Count-1].sprite = cardImages[selectedCardId];
-            }
-            else if (selectedArea == 2)
-            {
-                P1A2CardImages[gameEngine.field.FactionAreas[selectedArea,0].Count-1].sprite = cardImages[selectedCardId];
-            }
+        if (gameEngine.field.PlayCard(gameEngine.players[0], gameEngine.players[0].Hand[selectedCardHandId], selectedArea)>0){
+            areas[selectedArea].players[0].cards[gameEngine.field.FactionAreas[selectedArea, 0].Count-1].sprite = cardImages[selectedCardId];
         }
-
         selectedCardHandId = 0;
+        selectedArea = -1;
         
-        if (gameEngine.player1.Hand.Count > 0)
+        if (gameEngine.players[0].Hand.Count > 0)
         {
-            selectedCardId = gameEngine.player1.Hand[selectedCardHandId].Id;
-            cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+            selectedCardId = gameEngine.players[0].Hand[selectedCardHandId].Id;
+            cardPreview.sprite = cardImages[gameEngine.players[0].Hand[selectedCardHandId].Id];
         }
             else
         {
@@ -74,30 +79,26 @@ public class UIManager : MonoBehaviour
 
         UpdatePlayerInfo();
     }
-    public void OnAreaClick(int index)
-    {
-        selectedArea = index;
-    }
 
     public void UpdatePlayerInfo()
     {
         
-        player1InfoText.text = $"{gameEngine.player1.CurrentHP} HP\n\n";
-        player2InfoText.text = $"{gameEngine.player2.CurrentHP} HP\n\n";
+        player1InfoText.text = $"{gameEngine.players[0].CurrentHP} HP\n\n";
+        player2InfoText.text = $"{gameEngine.players[1].CurrentHP} HP\n\n";
 
         player1InfoText.text += "Cards:\n";
-        foreach (Card card in gameEngine.player1.Hand)
+        foreach (Card card in gameEngine.players[0].Hand)
         {
             player1InfoText.text += $"ID: {card.Id}, Power: {card.Power}, Faction: {card.Faction}\n";
         }
 
         player2InfoText.text += "Cards:\n";
-        foreach (Card card in gameEngine.player2.Hand)
+        foreach (Card card in gameEngine.players[1].Hand)
         {
             player2InfoText.text += $"ID: {card.Id}, Power: {card.Power}, Faction: {card.Faction}\n";
         }
 
-        UpdateDropdown(gameEngine.player1, player1Dropdown);
+        UpdateDropdown(gameEngine.players[0], player1Dropdown);
     }
 
     void UpdateDropdown(Player player, Dropdown dropdown)
@@ -107,11 +108,13 @@ public class UIManager : MonoBehaviour
         List<string> cardOptions = new List<string>();
         foreach (Card card in player.Hand)
         {
-            cardOptions.Add($"{card.ToString()}");
+            cardOptions.Add($"{card}");
         }
 
         dropdown.AddOptions(cardOptions);
-        if(gameEngine.player1.Hand.Count> 0)
-            cardPreview.sprite = cardImages[gameEngine.player1.Hand[selectedCardHandId].Id];
+        if(gameEngine.players[0].Hand.Count> 0)
+            cardPreview.sprite = cardImages[gameEngine.players[0].Hand[selectedCardHandId].Id];
     }
+
+
 }

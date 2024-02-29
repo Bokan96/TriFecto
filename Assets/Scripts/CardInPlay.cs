@@ -3,26 +3,29 @@ using UnityEngine.UI;
 
 public class CardInPlay : MonoBehaviour
 {
-    public int Id = 0;
-    public bool IsFlipped = false;
-    public Image image;
     public UIManager uIManager;
-    
-    public void ChangeId(int newId)
+    public int player;
+    public int area;
+    public int card;
+
+    private Image image;
+
+    public void OnClickCard()
     {
-        Id = newId;
-        image.sprite = uIManager.cardImages[Id];
-        if(newId == -1)
+        image = GetComponent<Image>();
+        uIManager.cardPreview.sprite = image.sprite;
+    }
+
+    public void OnClickCard2()
+    {
+        if(uIManager.gameEngine.field.factionAreas[area, player].Count - 1 >= card)
         {
-            image.sprite = null;
+            uIManager.cardPreview.sprite = uIManager.cardImages[uIManager.gameEngine.field.factionAreas[area, player][card].Id];
+            Debug.Log($"Selected {uIManager.gameEngine.field.factionAreas[0, 0][0]}");
         }
-    }
-    public void Flip()
-    {
-        IsFlipped = !IsFlipped;
-    }
-    public void Flip(bool flipped)
-    {
-        IsFlipped = flipped;
+        else
+        {
+            Debug.Log("Nema karte tu.");
+        }
     }
 }

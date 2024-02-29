@@ -6,13 +6,12 @@ using UnityEngine.UI;
 public class Field
 {
     // Field attributes
-    private List<Card>[,] factionAreas;
+    public List<Card>[,] factionAreas;
     private int[,] playerTotalPower;
     private Player[] winningPlayer;
 
     public List<Card>[,] FactionAreas { get => factionAreas; set => factionAreas = value; }
 
-    // Constructor to initialize the field with three faction areas
     public Field()
     {
         factionAreas = new List<Card>[3, 2];
@@ -29,8 +28,23 @@ public class Field
         }
     }
 
-    // Method to play a card onto the field
     public int PlayCard(Player player, Card card, int areaIndex)
+    {
+        if (IspunjeniUslovi(player, card, areaIndex))
+        {
+            player.Hand.Remove(card);
+            factionAreas[areaIndex, player.PlayerID].Add(card);
+            playerTotalPower[areaIndex, player.PlayerID] += card.Power;
+            UpdateWinningPlayer(areaIndex);
+            Debug.Log("Karta odigrana");
+            Debug.Log($"{factionAreas[areaIndex, player.PlayerID][factionAreas[areaIndex, player.PlayerID].Count-1]}");
+            return card.Id;
+        }
+        else
+            return -1;
+    }
+
+    public bool IspunjeniUslovi(Player player, Card card, int areaIndex)
     {
         int playerID = player.PlayerID;
         int faction = card.Faction;
@@ -38,18 +52,12 @@ public class Field
         if ((faction != areaIndex) && (card.IsFlipped == false))
         {
             Debug.Log($"Cannot play {card.ToString()} in Area {areaIndex} with faction {faction}. Faction mismatch.");
-            return -1;
+            return false;
         }
-
-        player.Hand.Remove(card);
-        factionAreas[areaIndex, playerID].Add(card);
-        playerTotalPower[areaIndex, playerID] += card.Power;
-        UpdateWinningPlayer(areaIndex);
-
-        return card.Id;
+        else
+            return true;
     }
 
-    // Method to determine the winning player in each area
     private void UpdateWinningPlayer(int areaIndex)
     {
         int maxPower = 0;
@@ -68,7 +76,6 @@ public class Field
         winningPlayer[areaIndex] = currentWinningPlayer;
     }
 
-    // Method to display the current state of the field
     public void DisplayFieldState()
     {
         for (int i = 0; i < 3; i++)
