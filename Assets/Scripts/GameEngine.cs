@@ -11,19 +11,18 @@ public class GameEngine : MonoBehaviour
     void Start()
     {
         players = new Player[2];
-        players[0] = new Player(0, 10);
-        players[1] = new Player(1, 10);
+
         deck = new Deck();
         deck.Shuffle();
         field = new Field();
 
-        for(int i = 6; i > 0; i--)
+        for(int p = 0; p < players.Length; p++)
         {
-            deck.DealCardToPlayer(players[0]);
-            deck.DealCardToPlayer(players[1]);
+            players[p] = new Player(p, 10);
+            for (int i = 6; i > 0; i--)
+                deck.DealCardToPlayer(players[p]);
+            players[p].SortCardsInHandById();
         }
-        players[0].SortCardsInHandById();
-        players[1].SortCardsInHandById();
 
         DisplayGameState();
     }

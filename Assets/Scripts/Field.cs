@@ -30,6 +30,7 @@ public class Field
 
     public int PlayCard(Player player, Card card, int areaIndex)
     {
+        Debug.Log("flag1");
         if (IspunjeniUslovi(player, card, areaIndex))
         {
             player.Hand.Remove(card);
@@ -52,6 +53,11 @@ public class Field
         if ((faction != areaIndex) && (card.IsFlipped == false))
         {
             Debug.Log($"Cannot play {card.ToString()} in Area {areaIndex} with faction {faction}. Faction mismatch.");
+            return false;
+        }
+        else if(areaIndex == -1)
+        {
+            Debug.Log("Moras odabrati teren!");
             return false;
         }
         else

@@ -45,12 +45,4 @@ public class Deck
         return dealtCard;
     }
 
-    public void DisplayDeck()
-    {
-        Debug.Log("KArte u spilu:");
-        foreach (Card card in cards)
-        {
-            card.DisplayCardInfo();
-        }
-    }
 }

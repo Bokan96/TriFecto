@@ -18,10 +18,12 @@ public class CardInPlay : MonoBehaviour
 
     public void OnClickCard2()
     {
+        Card selectedCard;
         if(uIManager.gameEngine.field.factionAreas[area, player].Count - 1 >= card)
         {
-            uIManager.cardPreview.sprite = uIManager.cardImages[uIManager.gameEngine.field.factionAreas[area, player][card].Id];
-            Debug.Log($"Selected {uIManager.gameEngine.field.factionAreas[0, 0][0]}");
+            selectedCard = uIManager.gameEngine.field.factionAreas[area, player][card];
+            uIManager.ShowCard(selectedCard);
+            Debug.Log($"Selected {uIManager.gameEngine.field.factionAreas[area, player][card]}");
         }
         else
         {

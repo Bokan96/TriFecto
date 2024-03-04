@@ -5,12 +5,10 @@ public class SelectArea : MonoBehaviour
 {
     public UIManager uiManager;
     public int areaIndex;
-    public Image[] otherAreaImages;
-
-
     public void OnImageClick()
     {
-        uiManager.selectedArea = areaIndex;
+        uiManager.SelectArea(areaIndex);
+        this.transform.SetAsLastSibling();
         Debug.Log("Selected" + areaIndex);
     }
 }

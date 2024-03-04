@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
-
-
+using Image = UnityEngine.UI.Image;
 
 [System.Serializable]
 public class CardArea
@@ -21,55 +21,90 @@ public class PlayerImages
 
 public class UIManager : MonoBehaviour
 {
-    public TextMeshProUGUI player1InfoText;
-    public TextMeshProUGUI player2InfoText;
+    public TextMeshProUGUI debugText;
     public TextMeshProUGUI gameText;
 
     public GameEngine gameEngine;
-    public Dropdown player1Dropdown;
     public UnityEngine.UI.Button odigrajButton;
+    public UnityEngine.UI.Button flipButton;
     public UnityEngine.UI.Button[] areaButtons;
+    public UnityEngine.UI.Image[] areaImages;
     public UnityEngine.UI.Image cardPreview;
     public Sprite[] cardImages;
 
     public CardArea[] areas;
+    public GameObject[] cardsInHand;
 
 
     public int selectedCardHandId = 0;
-    public int selectedCardId;
+    public Card selectedCard;
     public int selectedArea = -1;
+
+    public int currentPlayer;
 
 
     void Start()
     {
-        selectedCardId = gameEngine.players[0].Hand[selectedCardHandId].Id;
+        currentPlayer = 0;
+        ShowHand();
 
-
-        player1Dropdown.onValueChanged.AddListener(OnCardSelect);
+        selectedCard = gameEngine.players[currentPlayer].Hand[selectedCardHandId];
         odigrajButton.onClick.AddListener(OnPlay);
+        flipButton.onClick.AddListener(OnFlip);
         UpdatePlayerInfo();
     }
 
     void OnCardSelect(int index)
     {
         selectedCardHandId = index;
-        selectedCardId = gameEngine.players[0].Hand[selectedCardHandId].Id;
-        cardPreview.sprite = cardImages[selectedCardId];
+        selectedCard = gameEngine.players[currentPlayer].Hand[selectedCardHandId];
+        ShowCard(selectedCard);
     }
-    // 0 field.
+
+    void OnPlay2()
+    {
+        Player player = gameEngine.players[currentPlayer];
+        Card card = player.Hand[selectedCardHandId];
+        if (gameEngine.field.PlayCard(gameEngine.players[currentPlayer], gameEngine.players[currentPlayer].Hand[selectedCardHandId], selectedArea) > 0)
+        {
+            areas[selectedArea].players[currentPlayer].cards[gameEngine.field.FactionAreas[selectedArea, currentPlayer].Count - 1].enabled = true;
+            areas[selectedArea].players[currentPlayer].cards[gameEngine.field.FactionAreas[selectedArea, currentPlayer].Count - 1].sprite = cardImages[0];
+            if (gameEngine.field.FactionAreas[selectedArea, currentPlayer][gameEngine.field.FactionAreas[selectedArea, currentPlayer].Count - 1].IsFlipped == false)
+                areas[selectedArea].players[currentPlayer].cards[gameEngine.field.FactionAreas[selectedArea, currentPlayer].Count - 1].sprite = cardImages[selectedCard.Id];
+            selectedCardHandId = 0;
+        }
+
+        SelectArea(-1);
+        ShowHand();
+        if (gameEngine.players[currentPlayer].Hand.Count > 0)
+        {
+            OnCardSelect(selectedCardHandId);
+        }
+        else
+        {
+            odigrajButton.enabled = false;
+            cardPreview.sprite = cardImages[0];
+        }
+
+        UpdatePlayerInfo();
+    }
 
     void OnPlay()
     {
-        if (gameEngine.field.PlayCard(gameEngine.players[0], gameEngine.players[0].Hand[selectedCardHandId], selectedArea)>0){
-            areas[selectedArea].players[0].cards[gameEngine.field.FactionAreas[selectedArea, 0].Count-1].sprite = cardImages[selectedCardId];
+        Player player = gameEngine.players[currentPlayer];
+        Card card = player.Hand[selectedCardHandId];
+
+        if (gameEngine.field.PlayCard(player, card, selectedArea)>0){
+            areas[selectedArea].players[currentPlayer].cards[gameEngine.field.FactionAreas[selectedArea, currentPlayer].Count - 1].gameObject.SetActive(true);
+            areas[selectedArea].players[currentPlayer].cards[gameEngine.field.FactionAreas[selectedArea, currentPlayer].Count - 1].sprite = CardSprite(selectedCard);
+            selectedCardHandId = 0;
         }
-        selectedCardHandId = 0;
-        selectedArea = -1;
         
-        if (gameEngine.players[0].Hand.Count > 0)
+        SelectArea(-1);
+        ShowHand();
+        if (gameEngine.players[currentPlayer].Hand.Count > 0)
         {
-            selectedCardId = gameEngine.players[0].Hand[selectedCardHandId].Id;
-            cardPreview.sprite = cardImages[gameEngine.players[0].Hand[selectedCardHandId].Id];
+            OnCardSelect(selectedCardHandId);
         }
             else
         {
@@ -80,41 +115,95 @@ public class UIManager : MonoBehaviour
         UpdatePlayerInfo();
     }
 
+    public void OnFlip()
+    {
+        gameEngine.players[currentPlayer].Hand[selectedCardHandId].Flip();
+        OnCardSelect(selectedCardHandId);
+        ShowHand();
+    }
+
+
     public void UpdatePlayerInfo()
     {
-        
-        player1InfoText.text = $"{gameEngine.players[0].CurrentHP} HP\n\n";
-        player2InfoText.text = $"{gameEngine.players[1].CurrentHP} HP\n\n";
-
-        player1InfoText.text += "Cards:\n";
-        foreach (Card card in gameEngine.players[0].Hand)
+        debugText.text = "Teren:\n";
+        for(int a = 0; a < 3;a++)
         {
-            player1InfoText.text += $"ID: {card.Id}, Power: {card.Power}, Faction: {card.Faction}\n";
+            for (int p = 0;p< 2; p++)
+            {
+                for(int c = 0; c < gameEngine.field.factionAreas[a, p].Count; c++)
+                {
+                    debugText.text += "a=" + a + " p=" + p + " " + gameEngine.field.factionAreas[a, p][c] + "\n";
+                }
+            }
         }
-
-        player2InfoText.text += "Cards:\n";
-        foreach (Card card in gameEngine.players[1].Hand)
-        {
-            player2InfoText.text += $"ID: {card.Id}, Power: {card.Power}, Faction: {card.Faction}\n";
-        }
-
-        UpdateDropdown(gameEngine.players[0], player1Dropdown);
     }
 
-    void UpdateDropdown(Player player, Dropdown dropdown)
+
+    public void ShowCard(Card card)
     {
-        dropdown.ClearOptions();
-
-        List<string> cardOptions = new List<string>();
-        foreach (Card card in player.Hand)
-        {
-            cardOptions.Add($"{card}");
-        }
-
-        dropdown.AddOptions(cardOptions);
-        if(gameEngine.players[0].Hand.Count> 0)
-            cardPreview.sprite = cardImages[gameEngine.players[0].Hand[selectedCardHandId].Id];
+        if (card.IsFlipped)
+            cardPreview.sprite = cardImages[0];
+        else
+            cardPreview.sprite = cardImages[card.Id];
+    }
+    public Sprite CardSprite(Card card)
+    {
+        if (card.IsFlipped)
+            return cardImages[0];
+        else
+            return cardImages[card.Id];
+    }
+    public void SwitchPlayerUI()
+    {
+        NextPlayer();
+        ShowHand();
+    }
+    public void NextPlayer()
+    {
+        currentPlayer = (currentPlayer + 1) % gameEngine.players.Length;
+        SelectArea(-1);
+        selectedCardHandId = 0;
+        selectedCard = gameEngine.players[currentPlayer].Hand[selectedCardHandId];
     }
 
+    public void SelectArea(int area)
+    {
+        selectedArea = area;
+        for (int i = 0; i<areaImages.Length; i++)
+        {
+            areaImages[i].transform.localScale = Vector3.one;
+            areaImages[i].color = Color.gray;
+        }
+        if(area != -1)
+        {
+            areaImages[area].transform.localScale = Vector3.one * 1.1f;
+            areaImages[area].color = Color.white;
+        }
+            
+    }
 
+    public void ShowHand()
+    {
+        for (int i = 0; i<6;i++)
+        {
+            cardsInHand[i].gameObject.SetActive(false);
+        }
+        for (int i = 0; i < gameEngine.players[currentPlayer].Hand.Count; i++)
+        {
+            cardsInHand[i].gameObject.SetActive(true);
+            Image imageOfCardHand = cardsInHand[i].GetComponent<Image>();
+            imageOfCardHand.sprite = CardSprite(gameEngine.players[currentPlayer].Hand[i]);
+            if(selectedCardHandId == i)
+            {
+                imageOfCardHand.transform.localScale = Vector3.one * 1.2f;
+                imageOfCardHand.color = Color.white;
+            }
+            else
+            {
+                imageOfCardHand.transform.localScale = Vector3.one;
+                imageOfCardHand.color = Color.grey;
+            }
+                
+        }
+    }
 }

@@ -59,8 +59,22 @@ public class Card
         Debug.Log($"{Name}:  POW {Power}| FAC {Faction}");
     }
 
+    public void Flip()
+    {
+        IsFlipped = !IsFlipped;
+    }
+
     public override string ToString()
     {
-        return $"[F{Faction}][P{Power}] {Name}";
+        char faction;
+        if (Faction == 0)
+            faction = 'C';
+        else if (Faction == 1)
+            faction = 'G';
+        else if (Faction == 2)
+            faction = 'B';
+        else
+            faction = 'X';
+        return $"[{faction}-{Power}] {Name}";
     }
 }
