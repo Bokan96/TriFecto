@@ -18,68 +18,14 @@ public class Field
         playerTotalPower = new int[3, 2];
         winningPlayer = new Player[3];
 
-        for (int i = 0; i < 3; i++)
+        for (int a = 0; a < 3; a++)
         {
-            for (int j = 0; j < 2; j++)
+            for (int p = 0; p < 2; p++)
             {
-                factionAreas[i, j] = new List<Card>();
+                factionAreas[a, p] = new List<Card>();
             }
-            winningPlayer[i] = null;
+            winningPlayer[a] = null;
         }
-    }
-
-    public int PlayCard(Player player, Card card, int areaIndex)
-    {
-        Debug.Log("flag1");
-        if (IspunjeniUslovi(player, card, areaIndex))
-        {
-            player.Hand.Remove(card);
-            factionAreas[areaIndex, player.PlayerID].Add(card);
-            playerTotalPower[areaIndex, player.PlayerID] += card.Power;
-            UpdateWinningPlayer(areaIndex);
-            Debug.Log("Karta odigrana");
-            Debug.Log($"{factionAreas[areaIndex, player.PlayerID][factionAreas[areaIndex, player.PlayerID].Count-1]}");
-            return card.Id;
-        }
-        else
-            return -1;
-    }
-
-    public bool IspunjeniUslovi(Player player, Card card, int areaIndex)
-    {
-        int playerID = player.PlayerID;
-        int faction = card.Faction;
-
-        if ((faction != areaIndex) && (card.IsFlipped == false))
-        {
-            Debug.Log($"Cannot play {card.ToString()} in Area {areaIndex} with faction {faction}. Faction mismatch.");
-            return false;
-        }
-        else if(areaIndex == -1)
-        {
-            Debug.Log("Moras odabrati teren!");
-            return false;
-        }
-        else
-            return true;
-    }
-
-    private void UpdateWinningPlayer(int areaIndex)
-    {
-        int maxPower = 0;
-        Player currentWinningPlayer = null;
-
-        for (int i = 0; i < 2; i++)
-        {
-            int power = playerTotalPower[areaIndex, i];
-            if (power > maxPower)
-            {
-                maxPower = power;
-                currentWinningPlayer = new Player(i, 20); // Assuming starting HP is 20
-            }
-        }
-
-        winningPlayer[areaIndex] = currentWinningPlayer;
     }
 
     public void DisplayFieldState()
@@ -108,4 +54,120 @@ public class Field
             Debug.Log("--------------");
         }
     }
+
+    public bool CardExists(int cardId)
+    {
+        for(int a = 0; a < 3; a++)
+        {
+            for(int p=0; p < 2; p++)
+            {
+                for(int c=0; c < factionAreas[a, p].Count; c++)
+                {
+                    if (factionAreas[a, p][c].Id == cardId)
+                        return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public bool CardExists(int cardId, int area)
+    {
+        for (int p = 0; p < 2; p++)
+        {
+            for (int c = 0; c < factionAreas[area, p].Count;c++)
+            {
+                if (factionAreas[area, p][c].Id == cardId && !factionAreas[area, p][c].IsFlipped)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public bool CardExists(int cardId, Player player)
+    {
+        for (int a = 0; a < 3; a++)
+        {
+            for (int c = 0; c < factionAreas[a, player.PlayerID].Count; c++)
+            {
+                if (factionAreas[a, player.PlayerID][c].Id == cardId && !factionAreas[a, player.PlayerID][c].IsFlipped)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public bool CardExists(int cardId, int area, Player player)
+    {
+        for (int c = 0; c < factionAreas[area, player.PlayerID].Count; c++)
+        {
+            if (factionAreas[area, player.PlayerID][c].Id == cardId && !factionAreas[area, player.PlayerID][c].IsFlipped)
+                return true;
+        }
+        return false;
+    }
+
+    public bool isOnTopOfArea(Card card)
+    {
+        for(int a=0;a < 3;a++)
+        {
+            for(int p=0; p<2; p++)
+            {
+                if (factionAreas[a, p].Count > 0 && factionAreas[a, p][factionAreas[a, p].Count - 1].Id == card.Id)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    public bool isOnTopOfArea(Card card, int area)
+    {
+        for (int p = 0; p < 2; p++)
+        {
+            if (factionAreas[area, p].Count > 0 && factionAreas[area, p][factionAreas[area, p].Count - 1].Id == card.Id)
+                return true;
+        }
+        return false;
+    }
+
+    public bool isOnTopOfArea(Card card, int area, Player player)
+    {
+        if (factionAreas[area, player.PlayerID].Count > 0 && factionAreas[area, player.PlayerID][factionAreas[area, player.PlayerID].Count - 1].Id == card.Id)
+            return true;
+        return false;
+    }
+
+    public int totalCards()
+    {
+        int total = 0;
+
+        for (int a = 0; a < 3; a++)
+            for (int p = 0; p < 2; p++)
+                total += factionAreas[a, p].Count;
+
+        return total;
+    }
+
+    public int totalCards(int area)
+    {
+        int total = 0;
+        for (int p = 0; p < 2; p++)
+            total += factionAreas[area, p].Count;
+        return total;
+    }
+
+    public int totalCards(int area, Player player)
+    {
+            return factionAreas[area, player.PlayerID].Count;
+    }
+
+    public int totalCards(Player player)
+    {
+        int total = 0;
+        for (int a = 0; a < 3; a++)
+            total += factionAreas[a, player.PlayerID].Count;
+        return total;
+    }
+
+
 }

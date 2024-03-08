@@ -4,9 +4,9 @@ using UnityEngine.XR;
 
 public class GameEngine : MonoBehaviour
 {
-    public Player[] players;
-    public Deck deck;
-    public Field field;
+    public static Player[] players;
+    public static Deck deck;
+    public static Field field;
 
     void Start()
     {

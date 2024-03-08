@@ -18,6 +18,7 @@ public class Player
 
     public void AddCardToHand(Card card)
     {
+        card.Player = this;
         Hand.Add(card);
     }
     public void SortCardsInHandById()

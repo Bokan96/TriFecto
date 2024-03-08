@@ -10,7 +10,10 @@ public class Card
     public int Id { get; set; }
     public int Power { get; set; }
     public int Faction { get; set; }
+
+    public int Area {  get; set; }
     public bool IsFlipped { get; set; }
+    public Player Player { get; set; }
     public String Name { get; set; }
 
     public Card(int id, int power, int faction, bool isFlipped, String name)
@@ -20,8 +23,9 @@ public class Card
         Faction = faction;
         IsFlipped = isFlipped;
         Name = name;
+        Player = null;
+        Area = -1;
     }
-
     
     public Card(int id)
     {
@@ -29,6 +33,8 @@ public class Card
         Power = (id - 1) % 6 + 1;
         Faction = (id - 1) / 6;
         IsFlipped |= false;
+        Player = null;
+        Area = -1;
         Name = id switch
         {
             1 => "Hinata",
@@ -76,5 +82,77 @@ public class Card
         else
             faction = 'X';
         return $"[{faction}-{Power}] {Name}";
+    }
+
+    public bool Playable(Player player, int area)
+    {
+        Field field = GameEngine.field;
+
+        bool playable;
+
+        if (area == -1 || player == null)
+        {
+            return false;
+        }
+
+        if (GameEngine.field.FactionAreas[area, player.PlayerID].Count >= 4)
+        {
+            UIManager.gameText.text = "Ne moze se odigrati vise od 4 karte na jedan teren.";
+            return false;
+        }
+
+
+        //  Levi
+        if (field.CardExists(11))
+        {
+            if ( field.CardExists(11, 1) && (area==0 || area==2) )
+            {
+                if (field.factionAreas[area,0].Count + field.factionAreas[area, 1].Count >= 3)
+                {
+                    UIManager.gameText.text = "Na ovo terenu ne moze biti vise od 3 karte";
+                    return false;
+                }
+            }
+            else if ( (field.CardExists(11, 0) || field.CardExists(11,2)) && area == 1)
+            {
+                if (field.factionAreas[area, 0].Count + field.factionAreas[area, 1].Count >= 3)
+                {
+                    UIManager.gameText.text = "Na ovo terenu ne moze biti vise od 3 karte";
+                    return false;
+                }
+            }
+        }
+
+
+        if (IsFlipped)
+        {
+            if (field.CardExists(17))       // Alphonse Elric
+            {
+                playable = false;
+                UIManager.gameText.text = "Karte se ne mogu odigrati neotkrivene ok je Alphonse na terenu.";
+            }
+            else
+                playable = true;
+        }
+        else
+        {
+            if (Faction == area)
+            {
+                playable = true;
+            }
+            else if (field.CardExists(16,player) && Power <= 3)        //Roy mustang
+            {
+                UIManager.gameText.text = "Roy Mustang omogucava igranje karte na ovaj teren.";
+                playable = true;
+            }
+            else
+            {
+                UIManager.gameText.text = "Karta mora biti iste boje kao teren.";
+                playable = false;
+            }
+        }
+
+
+        return playable;
     }
 }

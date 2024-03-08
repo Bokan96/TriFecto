@@ -39,6 +39,7 @@ public class Deck
         }
 
         Card dealtCard = cards[0];
+        dealtCard.Player = player;
         player.AddCardToHand(dealtCard);
         cards.RemoveAt(0);
 

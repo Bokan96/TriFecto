@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,26 +9,18 @@ public class CardInPlay : MonoBehaviour
     public int area;
     public int card;
 
-    private Image image;
-
-    public void OnClickCard()
-    {
-        image = GetComponent<Image>();
-        uIManager.cardPreview.sprite = image.sprite;
-    }
 
     public void OnClickCard2()
     {
         Card selectedCard;
-        if(uIManager.gameEngine.field.factionAreas[area, player].Count - 1 >= card)
-        {
-            selectedCard = uIManager.gameEngine.field.factionAreas[area, player][card];
-            uIManager.ShowCard(selectedCard);
-            Debug.Log($"Selected {uIManager.gameEngine.field.factionAreas[area, player][card]}");
-        }
+        selectedCard = GameEngine.field.factionAreas[area, player][card];
+        UIManager.selectedCardField = selectedCard;
+
+        if (UIManager.currentPlayer != player && selectedCard.IsFlipped==true)
+            uIManager.cardPreview.sprite = uIManager.cardImages[0];
         else
-        {
-            Debug.Log("Nema karte tu.");
-        }
+            uIManager.cardPreview.sprite = uIManager.cardImages[selectedCard.Id];
+
+        uIManager.ShowHand();
     }
 }

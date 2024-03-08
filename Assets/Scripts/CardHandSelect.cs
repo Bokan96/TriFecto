@@ -8,10 +8,15 @@ public class CardHandSelect : MonoBehaviour
     public UIManager uIManager;
     public void OnClick()
     {
-        Card card = uIManager.gameEngine.players[uIManager.currentPlayer].Hand[handId];
-        uIManager.selectedCardHandId = handId;
-        uIManager.selectedCard = card;
+        Card card = GameEngine.players[UIManager.currentPlayer].Hand[handId];
+        UIManager.selectedCardHandId = handId;
+        UIManager.selectedCardHand = card;
         uIManager.cardPreview.sprite = uIManager.CardSprite(card);
         uIManager.ShowHand();
+    }
+
+    public void OnClick2(int index)
+    {
+        uIManager.OnCardHandSelect(index);
     }
 }
