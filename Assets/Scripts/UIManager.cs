@@ -6,7 +6,6 @@ using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using Image = UnityEngine.UI.Image;
 
 [System.Serializable]
@@ -25,12 +24,20 @@ public class UIManager : MonoBehaviour
 {
     public TextMeshProUGUI debugText;
     public static TextMeshProUGUI gameText;
-    public static UnityEngine.UI.Button playButton;
-    public static UnityEngine.UI.Button flipButton;
-    public static UnityEngine.UI.Button endTurnButton;
-    public static UnityEngine.UI.Button targetSelectButton;
+    public static Button playButton;
+    public static Button flipButton;
+    public static Button endTurnButton;
+    public static Button targetSelectButton;
     public static GameObject selectHand;
     public static GameObject selectField;
+    public static GameObject handArea;
+    public static AudioSource soundClick1;
+    public static AudioSource soundClick2;
+    public static AudioSource soundUI;
+    public static AudioSource soundError;
+    public static AudioSource soundTerrain;
+    public static AudioSource soundFlip;
+    public static Text targetDescription;
 
     public GameEngine gameEngine;
 
@@ -42,6 +49,7 @@ public class UIManager : MonoBehaviour
 
     public CardArea[] areas;
     public GameObject[] cardsInHand;
+    public Sprite[] backgroundImages;
 
 
     public static int selectedCardHandId = -1;
@@ -51,28 +59,52 @@ public class UIManager : MonoBehaviour
 
     public static int currentPlayer;
     private Card playedCard;
+    private bool animationInProgress;
+    private bool cardPlayed;
+    private Image cardPreviewPlayed;
 
-
-    void Start()
+    void getComponents()
     {
-        currentPlayer = 0;
         gameText = GameObject.Find("GameText").GetComponent<TextMeshProUGUI>();
 
         playButton = GameObject.Find("ButtonPlay").GetComponent<UnityEngine.UI.Button>();
-        playButton.gameObject.SetActive(false);
         flipButton = GameObject.Find("ButtonFlip").GetComponent<UnityEngine.UI.Button>();
-        flipButton.gameObject.SetActive(false);
         endTurnButton = GameObject.Find("ButtonEnd").GetComponent<UnityEngine.UI.Button>();
         targetSelectButton = GameObject.Find("ButtonSelect").GetComponent<UnityEngine.UI.Button>();
+
         selectHand = GameObject.Find("SelectHand");
+        handArea = GameObject.Find("HandArea");
         selectField = GameObject.Find("SelectField");
+
+        targetDescription = GameObject.Find("TargetDescription").GetComponent<Text>();
+        cardPreviewPlayed = GameObject.Find("CardPreviewPlayed").GetComponent<Image>();
+
+        soundClick1 = GameObject.Find("ClickSound1").GetComponent<AudioSource>();
+        soundClick2 = GameObject.Find("ClickSound2").GetComponent<AudioSource>();
+        soundUI = GameObject.Find("UISound").GetComponent<AudioSource>();
+        soundError = GameObject.Find("ErrorSound").GetComponent<AudioSource>();
+        soundTerrain = GameObject.Find("TerrainSound").GetComponent<AudioSource>();
+        soundFlip = GameObject.Find("FlipSound").GetComponent<AudioSource>(); 
+
         selectField.gameObject.SetActive(false);
-
-        ShowHand();
-
+        playButton.gameObject.SetActive(false);
+        flipButton.gameObject.SetActive(false);
+        targetDescription.gameObject.SetActive(false);
 
         playButton.onClick.AddListener(OnPlay);
         flipButton.onClick.AddListener(OnFlip);
+    }
+
+    void Start()
+    {
+        getComponents();
+
+        SwitchPlayerUI();
+        currentPlayer = 0;
+        cardPlayed = false;
+        SelectArea(-1);
+        ShowHand();
+        
         UpdatePlayerInfo();
     }
 
@@ -105,11 +137,8 @@ public class UIManager : MonoBehaviour
             Debug.Log("Moras izabrati kartu iz ruke.");
             return;
         }
-        else if (selectedArea == -1)
-        {
-            Debug.Log("Moras izabrati teren.");
-            return;
-        }
+
+        soundClick2.Play();
 
         Player player = GameEngine.players[currentPlayer];
         Card card = player.Hand[selectedCardHandId];
@@ -134,7 +163,26 @@ public class UIManager : MonoBehaviour
     {
         playedCard = card;
         card.Area = area;
+
+        if (player.PlayerID != currentPlayer)
+        {
+            SwitchPlayerUI();
+            selectedCardField = card;
+        }
+            
+        GameObject image = areas[area].players[player.PlayerID].cards[GameEngine.field.totalCards(area,player)-1].gameObject;
         
+        
+
+        LeanTween.moveLocalX(image, 30f, 0.05f)
+            .setLoopPingPong(3)
+            .setEase(LeanTweenType.easeInBounce);
+
+
+        if (card.IsFlipped)
+            return;
+
+        //efekti karata ispod
 
         if (card.Id == 3 || card.Id == 9 || card.Id == 15)
         {
@@ -147,9 +195,8 @@ public class UIManager : MonoBehaviour
             {
                 Debug.Log("Na susednom terenu nema nijedna karta.");
             }
-            
-
         }
+
     }
 
     public void OnFlip()
@@ -160,9 +207,42 @@ public class UIManager : MonoBehaviour
             return;
         }
 
+        soundFlip.Play();
+
+        GameObject imageOfCard = GameObject.Find($"Card{selectedCardHandId}");
+
+        if (!animationInProgress)
+        {
+            animationInProgress = true;
+            LeanTween.rotateAroundLocal(imageOfCard, Vector3.forward, 360f, 0.2f)
+            .setEase(LeanTweenType.easeInOutQuad)
+            .setOnComplete(() =>
+            {
+                animationInProgress = false;
+            });
+        }
+        
+
         GameEngine.players[currentPlayer].Hand[selectedCardHandId].Flip();
         OnCardHandSelect(selectedCardHandId);
         ShowHand();
+    }
+
+    public Image getFieldImage(Card card)
+    {
+        for(int a = 0; a < 3; a++)
+        {
+            for(int p = 0; p < 2; p++)
+            {
+                for(int c = 0; c < GameEngine.field.FactionAreas[a,p].Count; c++)
+                {
+                    if(GameEngine.field.FactionAreas[a, p][c].Id == card.Id)    //error
+                        return areas[a].players[p].cards[c];
+                }
+            }
+        }
+        Debug.Log("Ne postoji ta karta flag4");
+        return null;
     }
 
     public void TargetSelect()
@@ -173,19 +253,36 @@ public class UIManager : MonoBehaviour
                 if (AdjecentAreas(playedCard.Area).Contains(selectedCardField.Area))
                 {
                     selectedCardField.Flip();
+                    soundFlip.Play();
+                    PlayCard(selectedCardField.Player, selectedCardField, selectedCardField.Area);
+                    Image imageOfCard = getFieldImage(selectedCardField);
+
+                    if (!animationInProgress)
+                    {
+                        animationInProgress = true;
+                        LeanTween.rotateAroundLocal(imageOfCard.gameObject, Vector3.forward, 360f, 0.2f)
+                        .setEase(LeanTweenType.easeInOutQuad)
+                        .setOnComplete(() =>
+                        {
+                            animationInProgress = false;
+                        });
+                    }
+
                     ShowField();
                     SwapUiElements();
                 }
                 else
                 {
-                    gameText.text = "Mozes okrenuti kartu samo sa susednog terena";
+                    soundError.Play();
+                    targetDescription.text = "Mozes okrenuti kartu samo sa susednog terena";
                 }
 
             
         }
         else
         {
-            Debug.Log("Moras odabrati kartu sa vrha terena");
+            soundError.Play();
+            targetDescription.text = "Moras odabrati kartu sa vrha terena";
         }
     }
 
@@ -207,7 +304,32 @@ public class UIManager : MonoBehaviour
     public void ShowCard(Card card)
     {
         cardPreview.sprite = CardSprite(card);
+        PreviewCardAnimation();
+
         ShowHand();
+    }
+
+    public void PreviewCardAnimation()
+    {
+        if (animationInProgress)
+            return;
+
+        animationInProgress = true;
+
+        Vector3 startingPosition = cardPreview.transform.position;
+
+        LeanTween.move(cardPreview.gameObject, cardPreview.transform.position + new Vector3(0f, 290f, 0f), 0.7f)
+            .setEase(LeanTweenType.easeOutExpo)
+            .setOnComplete(() =>
+            {
+                LeanTween.move(cardPreview.gameObject, cardPreview.transform.position - new Vector3(0f, 290f, 0f), 0.7f)
+                    .setEase(LeanTweenType.easeOutExpo)
+                    .setOnComplete(() =>
+                    {
+                        animationInProgress = false;
+                    });
+                
+            });
     }
 
     public Sprite CardSprite(Card card)
@@ -231,7 +353,30 @@ public class UIManager : MonoBehaviour
     public void SwitchPlayerUI()
     {
         currentPlayer = (currentPlayer + 1) % GameEngine.players.Length;
+        soundUI.Play();
         ResetAllSelections();
+
+        Image backGroundImage = GameObject.Find("OffScreen").GetComponent<Image>();
+        backGroundImage.sprite = backgroundImages[currentPlayer];
+
+        GameObject[] cardPlayAreas = GameObject.FindGameObjectsWithTag("CardPlayArea");
+
+        foreach (GameObject area in cardPlayAreas)
+        {
+            RectTransform rectTransform = area.GetComponent<RectTransform>();
+            VerticalLayoutGroup layout = area.GetComponent<VerticalLayoutGroup>();
+            if (rectTransform != null)
+            {
+                Vector2 currentAnchoredPosition = rectTransform.anchoredPosition;
+                currentAnchoredPosition.y = -currentAnchoredPosition.y;
+                rectTransform.anchoredPosition = currentAnchoredPosition;
+                if (layout.childAlignment == TextAnchor.UpperCenter)
+                    layout.childAlignment = TextAnchor.LowerCenter;
+                else
+                    layout.childAlignment = TextAnchor.UpperCenter;
+            }
+        }
+
         ShowHand();
     }
 
@@ -249,7 +394,7 @@ public class UIManager : MonoBehaviour
             areaImages[area].color = Color.white;
         }
 
-        if (selectedCardHand.Playable(GameEngine.players[currentPlayer],selectedArea))
+        if (selectedCardHand!=null && selectedCardHand.Playable(GameEngine.players[currentPlayer],selectedArea))
         {
             playButton.gameObject.SetActive(true);
         }
@@ -273,7 +418,7 @@ public class UIManager : MonoBehaviour
             imageOfCardHand.sprite = CardSprite(GameEngine.players[currentPlayer].Hand[i]);
             if (selectedCardHandId == i)
             {
-                imageOfCardHand.transform.localScale = Vector3.one * 1.3f;
+                LeanTween.scale(imageOfCardHand.gameObject, new Vector3(1.3f, 1.3f, 1.3f), 0.2f);
                 imageOfCardHand.color = Color.white;
                 imageOfCardHand.transform.rotation = Quaternion.Euler(0, 0, 5);
             }
@@ -291,6 +436,14 @@ public class UIManager : MonoBehaviour
     {
         selectHand.gameObject.SetActive(!selectHand.gameObject.activeInHierarchy);
         selectField.gameObject.SetActive(!selectField.gameObject.activeInHierarchy);
+        handArea.gameObject.SetActive(!handArea.gameObject.activeInHierarchy);
+        targetDescription.gameObject.SetActive(!targetDescription.gameObject.activeInHierarchy);
+        if(targetDescription.gameObject.activeInHierarchy)
+        {
+            cardPreviewPlayed.sprite = cardImages[playedCard.Id];
+            cardPreview.sprite = cardImages[playedCard.Id];
+        }
+        
     }
 
     public void ShowUiElement(int element)
@@ -321,11 +474,11 @@ public class UIManager : MonoBehaviour
 
     public void ResetAllSelections()
     {
-        selectedArea = -1;
+        SelectArea(-1);
         selectedCardField = null;
         selectedCardHand = null;
         selectedCardHandId = -1;
-        cardPreview.sprite = cardImages[0];
+        cardPreview.sprite = cardImages[19];
     }
 
 }

@@ -9,11 +9,14 @@ public class CardInPlay : MonoBehaviour
     public int area;
     public int card;
 
-
     public void OnClickCard2()
     {
         Card selectedCard;
+        if (area == -1)
+            selectedCard = UIManager.selectedCardHand;
+        else
         selectedCard = GameEngine.field.factionAreas[area, player][card];
+
         UIManager.selectedCardField = selectedCard;
 
         if (UIManager.currentPlayer != player && selectedCard.IsFlipped==true)

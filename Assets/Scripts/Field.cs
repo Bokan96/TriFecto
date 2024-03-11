@@ -63,7 +63,7 @@ public class Field
             {
                 for(int c=0; c < factionAreas[a, p].Count; c++)
                 {
-                    if (factionAreas[a, p][c].Id == cardId)
+                    if (factionAreas[a, p][c].Id == cardId && !factionAreas[a, p][c].IsFlipped)
                         return true;
                 }
             }

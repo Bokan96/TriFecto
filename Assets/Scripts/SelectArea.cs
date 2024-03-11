@@ -5,10 +5,12 @@ public class SelectArea : MonoBehaviour
 {
     public UIManager uiManager;
     public int areaIndex;
+    private AudioSource audioSource;
     public void OnImageClick()
     {
         uiManager.SelectArea(areaIndex);
-        this.transform.SetAsLastSibling();
+        audioSource = GameObject.Find("TerrainSound").GetComponent<AudioSource>();
+        audioSource.Play();
         Debug.Log("Selected" + areaIndex);
     }
 }
