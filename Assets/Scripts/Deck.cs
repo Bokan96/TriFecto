@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Deck
 {
-    private List<Card> cards;
+    public List<Card> cards;
     public Deck()
     {
         cards = new List<Card>();
@@ -13,6 +14,21 @@ public class Deck
         {
             Card newCard = new Card(i);
             cards.Add(newCard);
+        }
+    }
+
+    public Deck(int[] cardsIndluded)
+    {
+        cards = new List<Card>();
+        foreach (int card in cardsIndluded)
+        {
+            cards.Add(new Card(card));
+        }
+
+        for (int i = 1; i <= 18; i++)
+        {
+            if (!cardsIndluded.Contains(i) && cards.Count<15)
+                cards.Add(new Card(i));
         }
     }
 

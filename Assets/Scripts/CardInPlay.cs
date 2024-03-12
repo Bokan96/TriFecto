@@ -15,7 +15,7 @@ public class CardInPlay : MonoBehaviour
         if (area == -1)
             selectedCard = UIManager.selectedCardHand;
         else
-        selectedCard = GameEngine.field.factionAreas[area, player][card];
+            selectedCard = GameEngine.field.factionAreas[area, player][card];
 
         UIManager.selectedCardField = selectedCard;
 

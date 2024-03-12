@@ -8,12 +8,16 @@ public class Player
     public int PlayerID { get; private set; }
     public int CurrentHP { get; private set; }
     public List<Card> Hand { get; private set; }
+    public bool[] effects {  get; private set; }    // 0-Sasuke
 
     public Player(int playerID, int startingHP)
     {
         PlayerID = playerID;
         CurrentHP = startingHP;
         Hand = new List<Card>();
+        effects = new bool[2];
+        effects[0] = false;
+        effects[1] = false;
     }
 
     public void AddCardToHand(Card card)
@@ -39,5 +43,10 @@ public class Player
         }
         else
             Debug.Log("No cards in hand");
+    }
+
+    public void setEffect(int effect, bool state)
+    {
+        effects[effect] = state;
     }
 }

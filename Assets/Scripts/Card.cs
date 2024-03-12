@@ -16,6 +16,8 @@ public class Card
     public Player Player { get; set; }
     public String Name { get; set; }
 
+    public bool ActionCard {  get; set; }
+
     public Card(int id, int power, int faction, bool isFlipped, String name)
     {
         Id = id;
@@ -56,6 +58,29 @@ public class Card
             17 => "Alphonse Elric",
             18 => "Edvard Elric",
             _ => "Bezimena",
+        };
+
+        ActionCard = id switch
+        {
+            1 => true,
+            2 => true,
+            3 => true,
+            4 => false,
+            5 => true,
+            6 => false,
+            7 => true,
+            8 => false,
+            9 => true,
+            10 => true,
+            11 => false,
+            12 => false,
+            13 => false,
+            14 => true,
+            15 => true,
+            16 => false,
+            17 => false,
+            18 => false,
+            _ => false,
         };
     }
 
@@ -154,5 +179,14 @@ public class Card
 
 
         return playable;
+    }
+
+    public bool isOnTop()
+    {
+        for(int a=0;a<3;a++)
+            for(int p=2;p<2;p++)
+                if (GameEngine.field.factionAreas[a, p].Count > 0 && GameEngine.field.factionAreas[a, p][GameEngine.field.factionAreas[a, p].Count - 1].Id == Id)
+                    return true;
+        return false;
     }
 }

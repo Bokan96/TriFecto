@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class Field
 {
-    // Field attributes
     public List<Card>[,] factionAreas;
     private int[,] playerTotalPower;
     private Player[] winningPlayer;
@@ -114,7 +113,9 @@ public class Field
             for(int p=0; p<2; p++)
             {
                 if (factionAreas[a, p].Count > 0 && factionAreas[a, p][factionAreas[a, p].Count - 1].Id == card.Id)
+                {
                     return true;
+                }
             }
         }
         return false;
