@@ -238,7 +238,7 @@ public class UIManager : MonoBehaviour
         if (card.Id == 3 || card.Id == 9 || card.Id == 15)
         {
             Debug.Log("odigrana flip karta");
-            if  ((AdjecentAreas(area).Length==1 && GameEngine.field.totalCards(1) > 0) || (AdjecentAreas(area).Length == 2 && (GameEngine.field.totalCards(0)+GameEngine.field.totalCards(2)) > 0))
+            if ((AdjecentAreas(area).Length == 1 && GameEngine.field.totalCards(1) > 0) || (AdjecentAreas(area).Length == 2 && (GameEngine.field.totalCards(0) + GameEngine.field.totalCards(2)) > 0))
             {
                 SwapUiElements();
             }
@@ -262,7 +262,12 @@ public class UIManager : MonoBehaviour
         }
         else if (card.Id == 1)
         {
-            Debug.Log("Odigrana Hinata");
+            if ( (area==1 && (GameEngine.field.totalCards(0,player)+GameEngine.field.totalCards(2, player) == 8)) || ((area == 0 || area == 2) && (GameEngine.field.totalCards(1, player) == 4)))
+            {
+                Debug.Log("Nema dovoljno mesta na terenu.");
+                return;
+            }
+                
             SwapUiElements();
             cardPreviewPlayed.sprite = cardImages[GameEngine.deck.cards[0].Id];
             cardPreview.sprite = cardImages[GameEngine.deck.cards[0].Id];
@@ -321,13 +326,12 @@ public class UIManager : MonoBehaviour
         Debug.Log("Kliknuto Izaberi metu");
         if (selectedCardField != null && GameEngine.field.isOnTopOfArea(selectedCardField) && playedCard.Id != 1)   // GameEngine.field.isOnTopOfArea(selectedCardField)
         {
-            Debug.Log("flaasdg");
             if (playedCard.Id == 3 || playedCard.Id == 9 || playedCard.Id == 15)    //  Rock Lee, Armin, Scar
                 if (AdjecentAreas(playedCard.Area).Contains(selectedCardField.Area))
                 {
                     selectedCardField.Flip();
                     soundFlip.Play();
-                    PlayCard(selectedCardField.Player, selectedCardField, selectedCardField.Area);
+                    
                     Image imageOfCard = getFieldImage(selectedCardField);
 
                     if (!animationInProgress)
@@ -338,6 +342,7 @@ public class UIManager : MonoBehaviour
                         .setOnComplete(() =>
                         {
                             animationInProgress = false;
+                            PlayCard(selectedCardField.Player, selectedCardField, selectedCardField.Area);
                         });
                     }
 
@@ -386,7 +391,7 @@ public class UIManager : MonoBehaviour
             {
                 selectedCardField.Flip();
                 soundFlip.Play();
-                PlayCard(selectedCardField.Player, selectedCardField, selectedCardField.Area);
+                
                 Image imageOfCard = getFieldImage(selectedCardField);
 
                 if (!animationInProgress)
@@ -397,6 +402,7 @@ public class UIManager : MonoBehaviour
                     .setOnComplete(() =>
                     {
                         animationInProgress = false;
+                        PlayCard(selectedCardField.Player, selectedCardField, selectedCardField.Area);
                     });
                 }
 
@@ -448,6 +454,11 @@ public class UIManager : MonoBehaviour
                 soundError.Play();
                 targetDescription.text = "Na ovom terenu ima previse karata.";
             }
+            else if (!AdjecentAreas(playedCard.Area).Contains(selectedArea))
+            {
+                soundError.Play();
+                targetDescription.text = "Moras odabrati susedan teren.";
+            }
             else if(GameEngine.deck.cards.Count == 0)
             {
                 soundError.Play();
@@ -461,6 +472,7 @@ public class UIManager : MonoBehaviour
                 GameEngine.deck.cards.Remove(hinataCard);
                 hinataCard.Area = selectedArea;
                 hinataCard.Player = GameEngine.players[currentPlayer];
+                hinataCard.Flip();
                 factionAreas[selectedArea, currentPlayer].Add(hinataCard);
                 getFieldImage(hinataCard).gameObject.SetActive(true);
 
