@@ -14,7 +14,7 @@ public class GameEngine : MonoBehaviour
         players = new Player[2];
 
         //deck = new Deck();
-        int[] testirane_karte = { 1, 2, 3, 5, 7, 9, 15, 16, 17};
+        int[] testirane_karte = {1,1,9,9,9,9,9,9};
         deck = new Deck(testirane_karte);
         deck.Shuffle();
         field = new Field();

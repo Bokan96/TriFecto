@@ -42,16 +42,16 @@ public class Card
             1 => "Hinata",
             2 => "Sakura",
             3 => "Rock Lee",
-            4 => "Kakashi",
+            4 => "Kakashi",         //4 Kakashi ispod njega 4
             5 => "Sasuke",
             6 => "Naruto",
             7 => "Historia",
-            8 => "Erwin Smith",
+            8 => "Erwin Smith",     //8 Erwin neotkrivene == 4
             9 => "Armin",
             10 => "Eren Yeager",
             11 => "Levi",
             12 => "Mikasa",
-            13 => "May Cheng",
+            13 => "May Cheng",      //13 May Cheng susedni tereni +3
             14 => "Armstrong",
             15 => "Scar",
             16 => "Roy Mustang",

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEditor;
@@ -40,6 +41,8 @@ public class UIManager : MonoBehaviour
     public static AudioSource soundTerrain;
     public static AudioSource soundFlip;
     public static Text targetDescription;
+    public static Text[,] scoresUI = new Text[3, 2];
+
 
     public GameEngine gameEngine;
 
@@ -65,6 +68,7 @@ public class UIManager : MonoBehaviour
     private bool cardPlayed;
     private Image cardPreviewPlayed;
     private List<Card>[,] factionAreas;
+    private int[,] scores = new int[3, 2];
 
     void getComponents()
     {
@@ -100,6 +104,14 @@ public class UIManager : MonoBehaviour
         flipButton.onClick.AddListener(OnFlip);
 
         factionAreas = GameEngine.field.factionAreas;
+
+        for(int a = 0;a<3;a++)
+            for(int p = 0; p < 2; p++)
+            {
+                scoresUI[a, p] = GameObject.Find($"P{p}A{a}Score").GetComponent<Text>();
+                scoresUI[a, p].text = $"{scores[a,p]}";
+            }
+                
     }
 
     void Start()
@@ -117,8 +129,68 @@ public class UIManager : MonoBehaviour
         UpdatePlayerInfo();
     }
 
+    private void CalculateScore()
+    {
+        List<Card>[,] factionAreas = GameEngine.field.factionAreas;
+        scores = new int[3, 2];
+
+        for(int a=0;a<3;a++)
+            for(int p = 0; p < 2; p++)
+            {
+                if (GameEngine.field.CardExists(13, a, GameEngine.players[p]))
+                {
+                    if (a == 1)
+                    {
+                        scores[0, p] += 3;
+                        scores[2, p] += 3;
+                    }
+                    else
+                        scores[1, p] += 3;
+                        
+                }
+                for (int c = 0; c < factionAreas[a, p].Count; c++)
+                {
+                    int power = factionAreas[a, p][c].Power;
+                    if (factionAreas[a, p][c].IsFlipped)
+                        power = 2;
+
+                    if (GameEngine.field.CardExists(4, a, GameEngine.players[p]) && c < factionAreas[a, p].Count - 1)
+                    {
+                        for (int i = c + 1; i < factionAreas[a, p].Count; i++)
+                        {
+                            if (factionAreas[a, p][i].Id == 4)
+                            {
+                                power = 4;
+                                break;
+                            }
+                        }
+                    }
+                    else if (GameEngine.field.CardExists(8, GameEngine.players[p]))
+                    {
+                        if (factionAreas[a, p][c].IsFlipped)
+                            power = 4;
+                    }
+                    scores[a, p] += power;
+                }
+            }
+                
+
+        for (int a = 0; a < 3; a++)
+            for (int p = 0; p < 2; p++)
+            {
+                scoresUI[a, p].text = scores[a, p].ToString();
+                if (scores[a, p] > scores[a, (p + 1) % 2])
+                    scoresUI[a, p].color = Color.green;
+                else if (scores[a, p] < scores[a, (p + 1) % 2])
+                    scoresUI[a, p].color = Color.red;
+                else
+                    scoresUI[a, p].color = Color.white;
+            }
+    }
+
     private void LateUpdate()
     {
+        CalculateScore();
         gameText.text = "Teren:\n";
         for (int p = 0; p < 2; p++)
         {
@@ -265,6 +337,11 @@ public class UIManager : MonoBehaviour
             if ( (area==1 && (GameEngine.field.totalCards(0,player)+GameEngine.field.totalCards(2, player) == 8)) || ((area == 0 || area == 2) && (GameEngine.field.totalCards(1, player) == 4)))
             {
                 Debug.Log("Nema dovoljno mesta na terenu.");
+                return;
+            }
+            else if(GameEngine.deck.cards.Count == 0)
+            {
+                Debug.Log("Nema vise karata u spilu.");
                 return;
             }
                 
@@ -443,7 +520,6 @@ public class UIManager : MonoBehaviour
         }
         else if (playedCard.Id == 1)     //  Hinata
         {
-            Debug.Log("Hinata123");
             if (selectedArea == -1)
             {
                 soundError.Play();
@@ -576,10 +652,14 @@ public class UIManager : MonoBehaviour
                 Vector2 currentAnchoredPosition = rectTransform.anchoredPosition;
                 currentAnchoredPosition.y = -currentAnchoredPosition.y;
                 rectTransform.anchoredPosition = currentAnchoredPosition;
-                if (layout.childAlignment == TextAnchor.UpperCenter)
-                    layout.childAlignment = TextAnchor.LowerCenter;
-                else
-                    layout.childAlignment = TextAnchor.UpperCenter;
+                if(layout != null)
+                {
+                    if (layout.childAlignment == TextAnchor.UpperCenter)
+                        layout.childAlignment = TextAnchor.LowerCenter;
+                    else
+                        layout.childAlignment = TextAnchor.UpperCenter;
+                }
+                
             }
         }
 
@@ -596,7 +676,8 @@ public class UIManager : MonoBehaviour
         }
         if (area != -1)
         {
-            areaImages[area].transform.localScale = Vector3.one * 1.1f;
+            LeanTween.scale(areaImages[area].GetComponent<RectTransform>(), Vector3.one * 1.1f, 0.1f);
+            //areaImages[area].transform.localScale = Vector3.one * 1.1f;
             areaImages[area].color = Color.white;
         }
 

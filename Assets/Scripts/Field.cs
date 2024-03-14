@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class Field
 {
     public List<Card>[,] factionAreas;
-    private int[,] playerTotalPower;
+    public int[,] scores;
     private Player[] winningPlayer;
 
     public List<Card>[,] FactionAreas { get => factionAreas; set => factionAreas = value; }
@@ -14,7 +14,7 @@ public class Field
     public Field()
     {
         factionAreas = new List<Card>[3, 2];
-        playerTotalPower = new int[3, 2];
+        scores = new int[3, 2];
         winningPlayer = new Player[3];
 
         for (int a = 0; a < 3; a++)
@@ -47,7 +47,7 @@ public class Field
                     card.DisplayCardInfo();
                 }
 
-                Debug.Log($"Total Power: {playerTotalPower[i, j]}");
+                Debug.Log($"Total Power: {scores[i, j]}");
             }
 
             Debug.Log("--------------");
